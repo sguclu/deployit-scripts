@@ -1,0 +1,8 @@
+<synthetic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.xebialabs.com/deployit/synthetic" xsi:schemaLocation="http://www.xebialabs.com/deployit/synthetic synthetic.xsd">
+  <type-modification type="udm.Application">
+     <property name="DaysToKeepSnapshots" category="Cleanup policy" required="false" description="Number of days before a snapshot version can be elected for deletion, 0 means : no cleanup based on package import date" kind="integer" default="0" transient="false"/>
+     <property name="MaxNbOfSnapshotsToKeep" category="Cleanup policy" required="false" description="How many latest snapshots versions to keep, 0 means : number of versions to keep ignored by the cleanup script" kind="integer" default="0" transient="false"/>
+     <property name="DaysToKeepReleases" category="Cleanup policy" required="false" description="Number of days before a release version can be elected for deletion, 0 means : no cleanup based on package import date" kind="integer" default="0" transient="false"/>
+     <property name="MaxNbOfReleasesToKeep" category="Cleanup policy" required="false" description="How many latest releases versions to keep, 0 means : number of versions to keep ignored by the cleanup script" kind="integer" default="0" transient="false"/>
+  </type-modification>
+</synthetic>
