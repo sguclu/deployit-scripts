@@ -1,6 +1,6 @@
 <synthetic xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.xebialabs.com/deployit/synthetic" xsi:schemaLocation="http://www.xebialabs.com/deployit/synthetic synthetic.xsd">
   <type-modification type="udm.Application">
-     <property name="MaxNbOfSnapshotsToKeep" category="Cleanup policy" required="false" description="How many latest snapshots versions to keep, 0 means : number of versions to keep ignored by the cleanup script" kind="integer" default="3" transient="false"/>
-     <property name="MaxNbOfReleasesToKeep" category="Cleanup policy" required="false" description="How many latest releases versions to keep, 0 means : number of versions to keep ignored by the cleanup script" kind="integer" default="5" transient="false"/>
+     <property name="MaxNbOfSnapshotsToKeep" category="Cleanup policy" required="false" description="How many latest snapshots versions to keep, <=0 means : no cleaning" kind="integer" default="3" transient="false"/>
+     <property name="MaxNbOfReleasesToKeep" category="Cleanup policy" required="false" description="How many latest releases versions to keep, <=0 means : no cleaning" kind="integer" default="5" transient="false"/>
   </type-modification>
 </synthetic>
