@@ -1,7 +1,5 @@
 # Applications cleanup script
-# Releases/snapshots versions are processed separately, depending on options defined for each package
-# Applications snapshots/release versions older than 30 days will be removed, except the last MaxNbOfSnapshotsToKeep / MaxNbOfReleasesToKeep
-from java.util import Calendar
+# Releases/snapshots versions are cleaned
 import sys,re
 
 # command-line options for debug and dry run
@@ -15,51 +13,62 @@ versionsRemoved = []
 versionsNotRemoved = []
 
 #creates a "Version tree" containing the versions to remove for each application
-def computeVersionTree(someVersions,nbOfSnapshotsToKeep,nbOfReleasesToKeep):
-  resultList=[]
-  snapshotsList=[]
-  releasesList=[]
+def computeVersionTree(someVersions,nbOfReleasesToKeep,nbOfSnapshotsToKeep):
+  resultList=[] ; snapshotsList=[] ; releasesList=[]
   for aVersion in someVersions:
     if snapshotsExpression.match(aVersion):  snapshotsList.append(aVersion)
     else:  releasesList.append(aVersion)
-  if debug:  print "releasesList=",releasesList
-  if debug:  print "nbOfReleasesToKeep=",nbOfReleasesToKeep  
-  if debug:  print "snapshotsList=",snapshotsList	  
-  if debug:  print "nbOfSnapshotsToKeep=",nbOfSnapshotsToKeep  
-  if (len(releasesList) > nbOfReleasesToKeep):  resultList.append(releasesList[0:len(releasesList)-nbOfReleasesToKeep])
-  if debug:  print "Versions to remove: ",resultList	  
-  if (len(snapshotsList) > nbOfSnapshotsToKeep):  resultList.append(snapshotsList[0:len(snapshotsList)-nbOfSnapshotsToKeep])  
-  if debug:  print "Versions to remove: ",resultList	  
+  nbOfReleases=len(releasesList) ;  nbOfSnapshots=len(snapshotsList)
+  if debug:
+    print "DEBUG - ",nbOfReleases,"releases (",nbOfReleasesToKeep,"versions to keep)"
+    print "DEBUG - ",nbOfSnapshots,"snapshots (",nbOfSnapshotsToKeep,"versions to keep)"  
+    print "DEBUG - releasesList=",releasesList
+    print "DEBUG - snapshotsList=",snapshotsList
+  if 0 < nbOfReleasesToKeep < nbOfReleases:  resultList.append(releasesList[0 : nbOfReleases - nbOfReleasesToKeep])
+  if 0 < nbOfSnapshotsToKeep < nbOfSnapshots:  resultList.append(snapshotsList[0 : nbOfSnapshots - nbOfSnapshotsToKeep])
+  if debug:  print "DEBUG - Versions to remove: ",resultList	  
   return resultList
 
 #cleanup function checking the dryrun mode
 def deleteVersion(aVersion):
-  if dryrun:  print "DRY RUN ACTIVATED, ",aVersion, "PACKAGE NOT REMOVED"
-  else:
-    try:
-      repository.delete(aVersion)
-      versionsRemoved.append(aVersion)
-    except:
-      print "ERROR DURING ",aVersion, "REMOVAL"
-      versionsNotRemoved.append(aVersion)
+  ver=version[0]
+  try:
+    if dryrun:  
+      print " -> NOT REMOVED (dryrun mode)"
+      versionsNotRemoved.append(ver)
+    else:  
+      repository.delete(ver)
+      versionsRemoved.append(ver)
+      print " -> REMOVED"
+  except:
+    if debug:  print sys.exc_info()
+    versionsNotRemoved.append(ver)
+    print " -> NOT REMOVED (still referenced?)"
 
 # main loop
+print "APPLICATIONS VERSIONS CLEANUP TOOL\n"
 applications=repository.search("udm.Application")
-if debug:  print "applications : ",applications	  
 for application in applications:
   try: 
     app=repository.read(application) 
     versions=repository.search("udm.DeploymentPackage",application)
-    maxNbOfSnapshotsToKeep=app.getSyntheticProperty("MaxNbOfSnapshotsToKeep")
-    maxNbOfReleasesToKeep=app.getSyntheticProperty("MaxNbOfReleasesToKeep")
-    print "Application : ",app, "(MaxNbOfReleasesToKeep : ",maxNbOfReleasesToKeep,", MaxNbOfSnapshotsToKeep :",maxNbOfSnapshotsToKeep,")"
-    if debug:  print "Versions : ",versions
-    removableVersions=computeVersionTree(versions,maxNbOfSnapshotsToKeep,maxNbOfReleasesToKeep)
-    for version in removableVersions:
-	print "Version to delete : ",version
-	deleteVersion(version)
+    maxNbOfSnapshotsToKeep=int(app.getSyntheticProperty("MaxNbOfSnapshotsToKeep"))
+    maxNbOfReleasesToKeep=int(app.getSyntheticProperty("MaxNbOfReleasesToKeep"))
+    print "Application : ",app
   except:
     print sys.exc_info()
+  removableVersions=computeVersionTree(versions,maxNbOfReleasesToKeep,maxNbOfSnapshotsToKeep)
+  if removableVersions == []: print "No versions to remove.\n"
+  for version in removableVersions:
+    print "Version to delete : ", version,
+    deleteVersion(version)
 
-print "Candidate versions removed : ", versionsRemoved
-print "Planned but still used versions : ", versionsNotRemoved
+print "\nExecution summary:"
+if dryrun:
+  print  len(versionsNotRemoved), "versions candidates for removal but not removed (dryrun mode)"
+  if debug:  print "DEBUG - details : ", versionsNotRemoved
+else:
+  print len(versionsRemoved), "candidate versions removed"
+  if debug:  print "DEBUG - details : ", versionsRemoved
+  print len(versionsNotRemoved), "candidate versions not removed (still used?)"
+  if debug:  print "DEBUG - details : ", versionsNotRemoved
