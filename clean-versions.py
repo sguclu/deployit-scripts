@@ -52,8 +52,8 @@ for application in applications:
   try: 
     app=repository.read(application) 
     versions=repository.search("udm.DeploymentPackage",application)
-    maxNbOfSnapshotsToKeep=int(app.getSyntheticProperty("MaxNbOfSnapshotsToKeep"))
-    maxNbOfReleasesToKeep=int(app.getSyntheticProperty("MaxNbOfReleasesToKeep"))
+    maxNbOfSnapshotsToKeep=int(app."MaxNbOfSnapshotsToKeep"))
+    maxNbOfReleasesToKeep=int(app."MaxNbOfReleasesToKeep"))
     print "Application : ",app
   except:
     print sys.exc_info()
