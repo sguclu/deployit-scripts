@@ -1,7 +1,6 @@
 import sys
 
 # TODOS : 
-# Restore the report#view privilege
 # Create the "final" directories with the appropriate privileges (with config???)
 # Create a pipeline ?? 
 
@@ -9,12 +8,9 @@ import sys
 items = [ 'Infrastructure', 'Environments', 'Applications', 'Configuration' ]
 roles = [ 'SYSADMIN', 'OPERATOR', 'APPADMIN' ]
 globalprivileges = {}
-# globalprivileges['SYSADMIN'] = [ "discovery", "login", "report#view" ]
-globalprivileges['SYSADMIN'] = [ "discovery", "login" ]
-# globalprivileges['APPADMIN'] = [ "login", "report#view" ]
-globalprivileges['APPADMIN'] = [ "login" ]
-#globalprivileges['OPERATOR'] = [ "controltask#execute", "login", "report#view", "task#assign", "task#move_step", "task#preview_step", "task#skip_step" ]
-globalprivileges['OPERATOR'] = [ "controltask#execute", "login", "task#assign", "task#move_step", "task#preview_step", "task#skip_step" ]
+globalprivileges['SYSADMIN'] = [ "discovery", "login", "report#view" ]
+globalprivileges['APPADMIN'] = [ "login", "report#view" ]
+globalprivileges['OPERATOR'] = [ "controltask#execute", "login", "report#view", "task#assign", "task#move_step", "task#preview_step", "task#skip_step" ]
 
 
 # generic create function
