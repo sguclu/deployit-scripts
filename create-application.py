@@ -6,12 +6,18 @@ import sys
 
 # constants acting on the authorization matrix behaviour
 items = [ 'Infrastructure', 'Environments', 'Applications', 'Configuration' ]
-roles = [ 'SYSADMIN', 'OPERATOR', 'APPADMIN' ]
+roles = [ 'CITOOL', 'SYSADMIN', 'OPERATOR', 'APPADMIN' ]
 globalprivileges = {}
+appprivileges = {}
+# authorization matrix rules
 globalprivileges['SYSADMIN'] = [ "discovery", "login", "report#view" ]
 globalprivileges['APPADMIN'] = [ "login", "report#view" ]
-globalprivileges['OPERATOR'] = [ "controltask#execute", "login", "report#view", "task#assign", "task#move_step", "task#preview_step", "task#skip_step" ]
-
+globalprivileges['OPERATOR'] = [ "login", "report#view", "task#assign", "task#preview_step" ]
+globalprivileges['CITOOL'] = [ "login", "report#view", "task#assign", "task#preview_step" ]
+appprivileges['SYSADMIN'] = { 'Infrastructure': [ "controltask#execute","read","repo#edit" ] }
+appprivileges['OPERATOR'] = { 'Applications' : [ "read" ], 'Environments', [ "controltask#execute", "deploy#initial", "deploy#undeploy", "deploy#upgrade", "read", "repo#edit", "task#move_step", "task#skip_step" ], 'Configuration': [ "read" ] }
+appprivileges['APPADMIN'] = { 'Applications' : [ "controltask#execute", "import#initial", "import#remove", "import#upgrade", "read", "repo#edit" ], 'Environments' : [ "controltask#execute", "read", "repo#edit" ], 'Configuration' : [ "controltask#execute", "read", "repo#edit" ] } 
+appprivileges['CITOOL'] = { 'Applications' : [ "controltask#execute", "import#initial", "import#upgrade" ] }
 
 # generic create function
 def create(id, type):
@@ -38,8 +44,11 @@ for i in range(len(departmentpaths)):
 # creates all the roles required for this application
 for env in environments:
   for role in roles:
-    # roles created : for each application the role is instanciated on each environment
-    app_env_role = application + "_" + env + "_" + role
+    # roles created : for each application the role is instanciated on each environment except CITOOL
+    if ( role.equals("CITOOL")):
+      app_env_role = application + "_" + role
+    else:
+      app_env_role = application + "_" + env + "_" + role
     print " -- create role " + app_env_role
     security.assignRole(app_env_role, [])
     # global privileges attribution for each role instance
@@ -56,8 +65,27 @@ for item in items:
     # applies read privilege for all roles
     for env in environments:
       for role in roles:
-        app_env_role = application + "_" + env + "_" + role
+	    if ( role.equals("CITOOL")):
+          app_env_role = application + "_" + role
+        else:
+          app_env_role = application + "_" + env + "_" + role
         print " ---- giving 'read' privilege to : " + app_env_role
         security.grant("read",app_env_role, [ temppath ])
 		
-		
+# binds application roles with "final" directories
+
+for item in items:
+  directoryList == []
+  if (item == 'Applications'):
+    directoryList = [ item + "/" + department + "/" + application ]
+  else:
+  for environment in environments:
+    directoryList.append(item + "/" + department + "/" + application + "/" + environment)
+
+  create(temppath + "/" + env, "core.Directory")
+  for role in roles:
+    if ( role.equals("CITOOL")):
+      app_env_role = application + "_" + role
+    else:
+      app_env_role = application + "_" + env + "_" + role
+	    
