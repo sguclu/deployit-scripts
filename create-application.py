@@ -87,4 +87,9 @@ for item in items:
           security.grant(privilege, app_env_role, [directory])
 
 # finally, creates a pipeline with the different environments
+pipelineId = conf + '/' + application + '-deployment-pipeline'
+repository.create(factory.configurationItem(pipelineId, 'release.DeploymentPipeline', {'pipeline' : envIdList}))
+
+# create an Application entry and link it to the pipeline
+repository.create(factory.configurationItem('Applications/' + application + '-dar' , 'udm.Application', {'pipeline' : pipelineId}))
 
