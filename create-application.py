@@ -1,21 +1,19 @@
 import sys
 
-# TODO : Create a pipeline ?? 
-
 # constants acting on the authorization matrix behaviour
 items = [ 'Infrastructure', 'Environments', 'Applications', 'Configuration' ]
-roles = [ 'CITOOL', 'SYSADMIN', 'OPERATOR', 'APPADMIN' ]
+roles = [ 'IMPORTER', 'SYSADMIN', 'OPERATOR', 'APPADMIN' ]
 globalprivileges = {}
 appprivileges = {}
 # authorization matrix rules
 globalprivileges['SYSADMIN'] = [ "discovery", "login", "report#view" ]
 globalprivileges['APPADMIN'] = [ "login", "report#view" ]
 globalprivileges['OPERATOR'] = [ "login", "report#view", "task#assign", "task#preview_step" ]
-globalprivileges['CITOOL'] = [ "login", "report#view" ]
+globalprivileges['IMPORTER'] = [ "login", "report#view" ]
 appprivileges['SYSADMIN'] = { 'Applications' : [], 'Infrastructure' : [ "controltask#execute","read","repo#edit" ], 'Environments' : [], 'Configuration' : [] }
 appprivileges['OPERATOR'] = { 'Applications' : [ "read" ], 'Infrastructure': [], 'Environments' : [ "controltask#execute", "deploy#initial", "deploy#undeploy", "deploy#upgrade", "read", "repo#edit", "task#move_step", "task#skip_step" ], 'Configuration' : [ "read" ] }
 appprivileges['APPADMIN'] = { 'Applications' : [ "controltask#execute", "import#initial", "import#remove", "import#upgrade", "read", "repo#edit" ], 'Environments' : [ "controltask#execute", "read", "repo#edit" ], 'Configuration' : [ "controltask#execute", "read", "repo#edit" ] } 
-appprivileges['CITOOL'] = { 'Applications' : [ "controltask#execute", "import#initial", "import#upgrade" ], 'Infrastructure' : [], 'Environments' : [], 'Configuration' : [] }
+appprivileges['IMPORTER'] = { 'Applications' : [ "controltask#execute", "import#initial", "import#upgrade" ], 'Infrastructure' : [], 'Environments' : [], 'Configuration' : [] }
 
 # generic create function
 def create(id, type):
@@ -42,8 +40,8 @@ for i in range(len(departmentpaths)):
 # creates all the roles required for this application
 for env in environments:
   for role in roles:
-    # roles created : for each application the role is instanciated on each environment except CITOOL
-    if (role == "CITOOL"):  app_env_role = application + "_" + role
+    # roles created : for each application the role is instanciated on each environment except IMPORTER
+    if (role == "IMPORTER"):  app_env_role = application + "_" + role
     else:  app_env_role = application + "_" + env + "_" + role
     print " -- create role " + app_env_role
     security.assignRole(app_env_role, [])
@@ -51,6 +49,7 @@ for env in environments:
     for globalprivilege in globalprivileges[role]:
       print " ---- grant " + globalprivilege + " to " + app_env_role
       security.grant(globalprivilege,app_env_role)
+  print ""
 
 # creates the Applications, Infrastructure, Environments and Configuration intermediate directories
 for item in items:
@@ -61,35 +60,41 @@ for item in items:
     # applies read privilege for all roles
     for env in environments:
       for role in roles:
-        if (role == "CITOOL"):  app_env_role = application + "_" + role
+        if (role == "IMPORTER"):  app_env_role = application + "_" + role
         else:  app_env_role = application + "_" + env + "_" + role
         print " ---- giving 'read' privilege to : " + app_env_role
         security.grant("read",app_env_role, [ temppath ]) 
-		
+  print ""
+
+#Create "Applications" rights
+directory =  "Applications/" + department + "/" + application
+create( directory, "core.Directory")
+for role in roles:
+  for env in environments:
+    if ( role == "IMPORTER"): app_env_role = application + "_" + role
+    else: app_env_role = application + "_" + env + "_" + role
+    roleprivileges=appprivileges[role].get("Applications")
+    if (roleprivileges is not None):
+      for privilege in roleprivileges:
+        print "---- giving'" + privilege + "' to '" + app_env_role + "' role on directory : " + directory
+        security.grant(privilege, app_env_role, [directory])
+  print "" 
+    
+
 # binds application roles with "final" directories
 for item in items:
   directoryList = []
-  if (item == 'Applications'):
-    directoryList = [ item + "/" + department + "/" + application ]
-  else:
+  if (item != 'Applications'):
     for environment in environments:
       directoryList.append(item + "/" + department + "/" + application + "/" + environment)
-  for directory in directoryList:
-    print "-- creating directory : " + directory
-    create(directory, "core.Directory")
-    for role in roles:
-      if ( role == "CITOOL"):  app_env_role = application + "_" + role
-      else:  app_env_role = application + "_" + env + "_" + role
-      roleprivileges=appprivileges[role].get(item)
-      if (roleprivileges is not None):
-        for privilege in roleprivileges:
-          print "---- giving'" + privilege + "' to '" + app_env_role + "' role on directory : " + directory
-          security.grant(privilege, app_env_role, [directory])
-
-# finally, creates a pipeline with the different environments
-pipelineId = conf + '/' + application + '-deployment-pipeline'
-repository.create(factory.configurationItem(pipelineId, 'release.DeploymentPipeline', {'pipeline' : envIdList}))
-
-# create an Application entry and link it to the pipeline
-repository.create(factory.configurationItem('Applications/' + application + '-dar' , 'udm.Application', {'pipeline' : pipelineId}))
-
+    for directory in directoryList:
+      print "-- creating directory : " + directory
+      create(directory, "core.Directory")
+      for role in roles:
+        if ( role == "IMPORTER"): app_env_role = application + "_" + role
+        else: app_env_role = application + "_" + directory.split("/")[-1] + "_" + role
+        roleprivileges=appprivileges[role].get(item)
+        if (roleprivileges is not None):
+          for privilege in roleprivileges:
+            print "---- giving'" + privilege + "' to '" + app_env_role + "' role on directory : " + directory
+            security.grant(privilege, app_env_role, [directory])
