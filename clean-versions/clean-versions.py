@@ -16,8 +16,8 @@ versionsNotRemoved = []
 def computeVersionTree(someVersions,nbOfReleasesToKeep,nbOfSnapshotsToKeep):
   resultList=[] ; snapshotsList=[] ; releasesList=[]
   for aVersion in someVersions:
-    if snapshotsExpression.match(aVersion):  snapshotsList.append(aVersion)
-    else:  releasesList.append(aVersion)
+    if snapshotsExpression.match(aVersion): snapshotsList.append(aVersion)
+    else:   releasesList.append(aVersion)
   nbOfReleases=len(releasesList) ;  nbOfSnapshots=len(snapshotsList)
   if debug:
     print "DEBUG - ",nbOfReleases,"releases (",nbOfReleasesToKeep,"versions to keep)"
@@ -52,8 +52,8 @@ for application in applications:
   try: 
     app=repository.read(application) 
     versions=repository.search("udm.DeploymentPackage",application)
-    maxNbOfSnapshotsToKeep=int(app."MaxNbOfSnapshotsToKeep"))
-    maxNbOfReleasesToKeep=int(app."MaxNbOfReleasesToKeep"))
+    maxNbOfSnapshotsToKeep=int(app.MaxNbOfSnapshotsToKeep)
+    maxNbOfReleasesToKeep=int(app.MaxNbOfReleasesToKeep)
     print "Application : ",app
   except:
     print sys.exc_info()
@@ -72,3 +72,4 @@ else:
   if debug:  print "DEBUG - details : ", versionsRemoved
   print len(versionsNotRemoved), "candidate versions not removed (still used?)"
   if debug:  print "DEBUG - details : ", versionsNotRemoved
+
