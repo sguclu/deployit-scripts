@@ -60,7 +60,7 @@ for application in applications:
   removableVersions=computeVersionTree(versions,maxNbOfReleasesToKeep,maxNbOfSnapshotsToKeep)
   if removableVersions == []: print "No versions to remove.\n"
   for version in removableVersions:
-    print "Version to delete : ", version,
+    print "Version to delete : ", version
     deleteVersion(version)
 
 print "\nExecution summary:"
