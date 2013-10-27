@@ -31,7 +31,7 @@ def computeVersionTree(someVersions,nbOfReleasesToKeep,nbOfSnapshotsToKeep):
 
 #cleanup function checking the dryrun mode
 def deleteVersion(aVersion):
-  ver=version[0]
+  ver=aVersion
   try:
     if dryrun:  
       print " -> NOT REMOVED (dryrun mode)"
@@ -59,9 +59,10 @@ for application in applications:
     print sys.exc_info()
   removableVersions=computeVersionTree(versions,maxNbOfReleasesToKeep,maxNbOfSnapshotsToKeep)
   if removableVersions == []: print "No versions to remove.\n"
-  for version in removableVersions:
-    print "Version to delete : ", version
-    deleteVersion(version)
+  for list in removableVersions:
+    for version in list:
+      print "Version to delete : ", version
+      deleteVersion(version)
 
 print "\nExecution summary:"
 if dryrun:
@@ -72,4 +73,3 @@ else:
   if debug:  print "DEBUG - details : ", versionsRemoved
   print len(versionsNotRemoved), "candidate versions not removed (still used?)"
   if debug:  print "DEBUG - details : ", versionsNotRemoved
-
