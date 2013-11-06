@@ -73,3 +73,6 @@ else:
   if debug:  print "DEBUG - details : ", versionsRemoved
   print len(versionsNotRemoved), "candidate versions not removed (still used?)"
   if debug:  print "DEBUG - details : ", versionsNotRemoved
+
+# garbage collection added "just in case"
+deployit.runGarbageCollector()
