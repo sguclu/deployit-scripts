@@ -1,9 +1,9 @@
 #!/bin/bash
-export JAVA_HOME=/home/dpyprd02/deployit/tools/java/current
-export DEPLOYIT_CLI_HOME=/home/dpyprd02/deployit/data/deployit01/cli
+export JAVA_HOME=/usr/lib/jvm/java-1.6.0-openjdk/
+export DEPLOYIT_CLI_HOME=/ALMBOX/data/deployit/inst01/server/
 
 export DEPLOYIT_CLI_OPTS="-Xms512m -Xmx2g"
 
 env | grep DEPLOYIT
-${DEPLOYIT_CLI_HOME}/bin/cli.sh -secure -host dpyprdap01.fr.world.socgen -port 4517 $*
+${DEPLOYIT_CLI_HOME}/bin/cli.sh -secure -host deploynode -port 4516 $*
 
