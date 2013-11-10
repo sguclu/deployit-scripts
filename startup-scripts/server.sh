@@ -1,13 +1,8 @@
 #!/bin/bash
-JAVA_HOME=/home/dpyprd02/deployit/tools/java/current
-DEPLOYIT_SERVER_HOME=/home/dpyprd02/deployit/data/deployit01/server
-DEPLOYIT_CFG_JAAS="${DEPLOYIT_SERVER_HOME}/kerberos/jaas.conf"
-DEPLOYIT_CFG_KRB5="${DEPLOYIT_SERVER_HOME}/kerberos/krb5.conf"
-
-DEPLOYIT_SERVER_OPTS="-Xmx6G -XX:MaxPermSize=128m -Djava.io.tmpdir=/home/dpyprd02/deployit/data/deployit01/tmp"
-DEPLOYIT_SERVER_OPTS="${DEPLOYIT_SERVER_OPTS} -Djavax.net.ssl.trustStore=/home/dpyprd02/deployit/data/.ssl/dpyprdap01.fr.world.socgen.jks"
-DEPLOYIT_SERVER_OPTS="${DEPLOYIT_SERVER_OPTS} -Djava.security.auth.login.config=${DEPLOYIT_CFG_JAAS}"
-DEPLOYIT_SERVER_OPTS="${DEPLOYIT_SERVER_OPTS} -Djava.security.krb5.conf=${DEPLOYIT_CFG_KRB5}"
+export DEPLOYIT_SERVER_HOME=/ALMBOX/data/deployit/inst01/server/
+export JAVA_HOME=/usr/lib/jvm/java-1.6.0-openjdk/
+export DEPLOYIT_SERVER_OPTS="-Xmx1024m -XX:MaxPermSize=128m"
+export DEPLOYIT_SERVER_LOG_OPTS="-Dlogback.configurationFile=${DEPLOYIT_SERVER_HOME}conf/logback.xml -Dderby.stream.error.file=${DEPLOYIT_SERVER_HOME}/log/derby.log -Djava.security.auth.login.config=${DEPLOYIT_SERVER_HOME}/conf/jaas.conf -Djava.security.krb5.conf=${DEPLOYIT_SERVER_HOME}/conf/krb5.conf"
 
 export JAVA_HOME
 export DEPLOYIT_SERVER_HOME
