@@ -1,10 +1,14 @@
 import sys
 
 # constants acting on the authorization matrix behaviour
-items = [ 'Infrastructure', 'Environments', 'Applications', 'Configuration' ]
-roles = [ 'IMPORTER', 'SYSADMIN', 'OPERATOR', 'APPADMIN' ]
-globalprivileges = {}
-appprivileges = {}
+# some entities will have environment-specific directories, others not
+nonEnvItems = [ 'Applications', 'Configuration' ]
+envItems = [ 'Infrastructure', 'Environments' ]
+items = nonEnvItems + envItems
+# some roles are environment-specific, others not
+nonEnvRoles = [ 'IMPORTER' ]
+envRoles = [ 'SYSADMIN', 'OPERATOR', 'APPADMIN' ]
+roles = nonEnvRoles + envRoles
 # authorization matrix rules
 globalprivileges['SYSADMIN'] = [ "discovery", "login", "report#view" ]
 globalprivileges['APPADMIN'] = [ "login", "report#view" ]
@@ -12,7 +16,7 @@ globalprivileges['OPERATOR'] = [ "login", "report#view", "task#assign", "task#pr
 globalprivileges['IMPORTER'] = [ "login", "report#view" ]
 appprivileges['SYSADMIN'] = { 'Applications' : [], 'Infrastructure' : [ "controltask#execute","read","repo#edit" ], 'Environments' : [], 'Configuration' : [] }
 appprivileges['OPERATOR'] = { 'Applications' : [ "read" ], 'Infrastructure': [], 'Environments' : [ "controltask#execute", "deploy#initial", "deploy#undeploy", "deploy#upgrade", "read", "repo#edit", "task#move_step", "task#skip_step" ], 'Configuration' : [ "read" ] }
-appprivileges['APPADMIN'] = { 'Applications' : [ "controltask#execute", "import#initial", "import#remove", "import#upgrade", "read", "repo#edit" ], 'Environments' : [ "controltask#execute", "read", "repo#edit" ], 'Configuration' : [ "controltask#execute", "read", "repo#edit" ] } 
+appprivileges['APPADMIN'] = { 'Applications' : [ "controltask#execute", "import#initial", "import#remove", "import#upgrade", "read", "repo#edit" ], 'Environments' : [ "controltask#execute", "read", "repo#edit" ], 'Configuration' : [ "controltask#execute", "read", "repo#edit" ] }
 appprivileges['IMPORTER'] = { 'Applications' : [ "controltask#execute", "import#initial", "import#upgrade" ], 'Infrastructure' : [], 'Environments' : [], 'Configuration' : [] }
 
 # generic create function
@@ -31,12 +35,12 @@ except:
   print sys.exc_info()
   raise Exception("EXCEPTION : Department,application and environments are mandatories")
 
-# initiates the list of "directories"  
+# initiates the list of "directories"
 departmentpaths=department.split("/")
 departmentpaths.append(application)
 for i in range(len(departmentpaths)):
-  if (i>0): departmentpaths[i]=departmentpaths[i-1]+'/'+departmentpaths[i]  
-  
+  if (i>0): departmentpaths[i]=departmentpaths[i-1]+'/'+departmentpaths[i]
+
 # creates all the roles required for this application
 for env in environments:
   for role in roles:
@@ -63,7 +67,7 @@ for item in items:
         if (role == "IMPORTER"):  app_env_role = application + "_" + role
         else:  app_env_role = application + "_" + env + "_" + role
         print " ---- giving 'read' privilege to : " + app_env_role
-        security.grant("read",app_env_role, [ temppath ]) 
+        security.grant("read",app_env_role, [ temppath ])
   print ""
 
 #Create "Applications" rights
@@ -78,8 +82,7 @@ for role in roles:
       for privilege in roleprivileges:
         print "---- giving'" + privilege + "' to '" + app_env_role + "' role on directory : " + directory
         security.grant(privilege, app_env_role, [directory])
-  print "" 
-    
+  print ""
 
 # binds application roles with "final" directories
 for item in items:
@@ -98,3 +101,4 @@ for item in items:
           for privilege in roleprivileges:
             print "---- giving'" + privilege + "' to '" + app_env_role + "' role on directory : " + directory
             security.grant(privilege, app_env_role, [directory])
+
