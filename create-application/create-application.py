@@ -33,6 +33,7 @@ try:
   environments = sys.argv[3].split(",")
 except:
   print sys.exc_info()
+  print "Usage : create-application.py '<OU1>/<OU2>/<OU3>', '<APP>', '<ENV1>,<ENV2>,<ENV3>')" 
   raise Exception("EXCEPTION : Department,application and environments are mandatories")
 
 # initiates the list of "directories"
@@ -44,8 +45,8 @@ for i in range(len(departmentpaths)):
 # creates all the roles required for this application
 for env in environments:
   for role in roles:
-    # roles created : for each application the role is instanciated on each environment except IMPORTER
-    if (role == "IMPORTER"):  app_env_role = application + "_" + role
+    # roles created : for each application the role is instanciated on each environment except nonEnvRoles ones
+    if (role in nonEnvRoles):  app_env_role = application + "_" + role
     else:  app_env_role = application + "_" + env + "_" + role
     print " -- create role " + app_env_role
     security.assignRole(app_env_role, [])
@@ -64,7 +65,7 @@ for item in items:
     # applies read privilege for all roles
     for env in environments:
       for role in roles:
-        if (role == "IMPORTER"):  app_env_role = application + "_" + role
+        if (role in nonEnvRoles):  app_env_role = application + "_" + role
         else:  app_env_role = application + "_" + env + "_" + role
         print " ---- giving 'read' privilege to : " + app_env_role
         security.grant("read",app_env_role, [ temppath ])
@@ -75,7 +76,7 @@ directory =  "Applications/" + department + "/" + application
 create( directory, "core.Directory")
 for role in roles:
   for env in environments:
-    if ( role == "IMPORTER"): app_env_role = application + "_" + role
+    if ( role in nonEnvRoles): app_env_role = application + "_" + role
     else: app_env_role = application + "_" + env + "_" + role
     roleprivileges=appprivileges[role].get("Applications")
     if (roleprivileges is not None):
@@ -87,14 +88,14 @@ for role in roles:
 # binds application roles with "final" directories
 for item in items:
   directoryList = []
-  if (item != 'Applications'):
+  if (item in envItems):
     for environment in environments:
       directoryList.append(item + "/" + department + "/" + application + "/" + environment)
     for directory in directoryList:
       print "-- creating directory : " + directory
       create(directory, "core.Directory")
       for role in roles:
-        if ( role == "IMPORTER"): app_env_role = application + "_" + role
+        if ( role in nonEnvRoles): app_env_role = application + "_" + role
         else: app_env_role = application + "_" + directory.split("/")[-1] + "_" + role
         roleprivileges=appprivileges[role].get(item)
         if (roleprivileges is not None):
