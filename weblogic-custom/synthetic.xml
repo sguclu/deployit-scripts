@@ -1,0 +1,6 @@
+  <!-- weblogic tests -->
+  <type-modification type="wls.Domain">
+    <property name="customWlstTemplatePath" category="Common" required="false" hidden="false" 
+    description="Path to alternate wlst.sh.ftl(unix) or wlst.cmd.ftl(windows) template" 
+    kind="string" default="my/wls" transient="false"/>
+  </type-modification>
